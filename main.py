@@ -24,6 +24,9 @@ menu_banner = R'''
 ▀▀  █▪▀▀▀ ▀▀▀ ▀▀  █▪▀▀▀ ▀█▄▀▪.▀  ▀  ▀ •   ·▀▀▀▀  ▀  ▀ ▀▀  █▪▀▀▀ ▀▀▀ 
 '''
 
+# without any args: reset color
+# with 3 args: red, green, blue for foreground
+# with 6 args: rgb for foreground & background
 def changeTextColor(*args):
     if len(args) == 0:
         print("\x1b[0m", end='')
