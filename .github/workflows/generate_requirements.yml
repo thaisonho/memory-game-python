@@ -26,7 +26,7 @@ jobs:
         pip install pipreqs
         
     - name: Generate requirements.txt
-      run: python -m pipreqs.pipreqs
+      run: python -m pipreqs.pipreqs --force
       
     - name: Commit changes
       run: |
