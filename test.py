@@ -7,8 +7,8 @@ img = Image.open(image_path)
 
 # Resize the image to fit the console width
 aspect_ratio = img.width / img.height
-new_width = 50  # Adjust this value according to your console width
-new_height = int(new_width / aspect_ratio * 0.55)  # Adjust the multiplier for height
+new_width = 120  # Adjust this value according to your console width
+new_height = 30  # Adjust the multiplier for height
 img_resized = img.resize((new_width, new_height))
 
 # Convert the image to ASCII art
