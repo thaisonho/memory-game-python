@@ -84,6 +84,5 @@ def gameMenu():
         # Exit
         return
 
-#gameMenu()
-print(TERM_WIDTH, TERM_HEIGHT)
-os.system("pause")
+#hello
+gameMenu()
