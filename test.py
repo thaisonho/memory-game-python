@@ -19,11 +19,11 @@ def get_color(ascii_value):
     # Map ASCII value to color
     if ascii_value < 50:
         return "white"  # Adjust colors as needed
-    elif ascii_value < 100:
-        return "cyan"
-    elif ascii_value < 150:
-        return "blue"
     elif ascii_value < 200:
+        return "cyan"
+    elif ascii_value < 300:
+        return "blue"
+    elif ascii_value < 100:
         return "red"
     else:
         return "white"
