@@ -61,8 +61,6 @@ def getMenuInput(x, y) -> int:
             print(GotoXY(x, y) + 40 * ' ', end='')
     return res
 
-
-
 def gameMenu():
     os.system("cls")
     changeTextColor(255, 209, 227)
@@ -86,4 +84,6 @@ def gameMenu():
         # Exit
         return
 
-gameMenu()
+#gameMenu()
+print(TERM_WIDTH, TERM_HEIGHT)
+os.system("pause")
