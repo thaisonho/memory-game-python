@@ -6,6 +6,8 @@ from termcolor import colored
 import numpy as np
 from colorama import Fore, Style
 import matplotlib.pyplot as plt
+import numpy as np
+from PIL import Image
 
 import winsound
 import threading
@@ -19,6 +21,37 @@ MENU_WIDTH   = int(29)
 MENU_HEIGHT  = int(6)
 
 
+def GotoXY(x, y) -> str:
+    res = "\x1b[{};{}f".format(y, x)
+    return res
+
+def get_ansi_color_code(r, g, b):
+    return round((r / 255) * 5) * 36 + round((g / 255) * 5) * 6 + round((b / 255) * 5) + 16
+
+def get_color(r, g, b):
+    return "\x1b[48;5;{}m \x1b[0m".format(get_ansi_color_code(r, g, b))
+
+def show_image(img_path):
+    try:
+        img = Image.open(img_path)
+    except FileNotFoundError:
+        exit('Image not found.')
+    newHeight = 30
+    newWidth = 120
+    img = img.resize((newWidth, newHeight), Image.LANCZOS)
+    img_arr = np.asarray(img)
+
+    for x in range(newHeight):
+        for y in range(newWidth):
+            pix = img_arr[x][y]
+            print(get_color(pix[0], pix[1], pix[2]), end='')
+        print()
+
+
+def game_match():
+    show_image("assets/friend.jpg")
+    GotoXY(50, 15)
+    print('NAME')
 
 
 menu = R'''
@@ -169,6 +202,10 @@ def gameMenu():
         return
 
 #hello
+#gameMenu()
+    
+
+game_match()
 #----------------------------------------------------#
 FixConsole()
 # #winsound.PlaySound("music.wav", winsound.SND_FILENAME | winsound.SND_ASYNC)
