@@ -50,8 +50,7 @@ def show_image(img_path):
 
 def game_match():
     show_image("assets/friend.jpg")
-    GotoXY(50, 15)
-    print('NAME')
+    print(GotoXY(50, 15) + 'NAME')
 
 
 menu = R'''
@@ -135,7 +134,6 @@ def gradientText(text, r_from, g_from, b_from, r_to, g_to, b_to):
 
     return res
 
-
 def printListAtPos(x_pos, y_pos, _src):
     for line in _src:
         print(GotoXY(x_pos, y_pos) + line)
@@ -195,10 +193,6 @@ def userChoice_v2():
             break
     return choice
 
-            
-
-
-
 def gameMenu():
     os.system("cls")
     changeTextColor(255, 209, 227)
@@ -224,3 +218,4 @@ def gameMenu():
     
 
 game_match()
+os.system("pause")
