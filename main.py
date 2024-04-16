@@ -1,6 +1,14 @@
 import os
 import time
 import keyboard
+from PIL import Image
+from termcolor import colored
+import numpy as np
+from colorama import Fore, Style
+import matplotlib.pyplot as plt
+import numpy as np
+from PIL import Image
+
 
 TERM_WIDTH       = os.get_terminal_size().columns
 TERM_HEIGHT      = os.get_terminal_size().lines
@@ -11,6 +19,40 @@ NEW_GAME_WIDTH   = 40
 SCORE_WIDTH      = 30
 GUIDE_WIDTH      = 24
 QUIT_WIDTH       = 19
+
+
+def GotoXY(x, y) -> str:
+    res = "\x1b[{};{}f".format(y, x)
+    return res
+
+def get_ansi_color_code(r, g, b):
+    return round((r / 255) * 5) * 36 + round((g / 255) * 5) * 6 + round((b / 255) * 5) + 16
+
+def get_color(r, g, b):
+    return "\x1b[48;5;{}m \x1b[0m".format(get_ansi_color_code(r, g, b))
+
+def show_image(img_path):
+    try:
+        img = Image.open(img_path)
+    except FileNotFoundError:
+        exit('Image not found.')
+    newHeight = 30
+    newWidth = 120
+    img = img.resize((newWidth, newHeight), Image.LANCZOS)
+    img_arr = np.asarray(img)
+
+    for x in range(newHeight):
+        for y in range(newWidth):
+            pix = img_arr[x][y]
+            print(get_color(pix[0], pix[1], pix[2]), end='')
+        print()
+
+
+def game_match():
+    show_image("assets/friend.jpg")
+    GotoXY(50, 15)
+    print('NAME')
+
 
 menu = R'''
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
@@ -178,4 +220,7 @@ def gameMenu():
     #     # Exit
     #     return
 
-gameMenu()
+#gameMenu()
+    
+
+game_match()
