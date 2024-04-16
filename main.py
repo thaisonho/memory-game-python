@@ -1,13 +1,10 @@
 import os
 import time
-import test
 from PIL import Image
 from termcolor import colored
 import numpy as np
 from colorama import Fore, Style
 import matplotlib.pyplot as plt
-import numpy as np
-from PIL import Image
 
 import winsound
 import threading
@@ -49,9 +46,10 @@ def show_image(img_path):
 
 
 def game_match():
-    show_image("assets/friend.jpg")
-    GotoXY(50, 15)
-    print('NAME')
+     show_image("assets/friend.jpg")
+     print(GotoXY(50, 15) + 'NAME')
+    
+
 
 
 menu = R'''
@@ -202,7 +200,7 @@ def gameMenu():
         return
 
 #----------------------------------------------------#
-FixConsole()
+#FixConsole()
 # #winsound.PlaySound("music.wav", winsound.SND_FILENAME | winsound.SND_ASYNC)
 # timing = True
 # # Tạo luồng cho đồng hồ đếm thời gian
@@ -212,6 +210,7 @@ FixConsole()
 #gameMenu()
 # # Đợi cho luồng đồng hồ đếm thời gian hoàn thành
 # timer_thread.join()
-gameMenu()
+#gameMenu()
 #game_match()
 #os.system("pause")
+
