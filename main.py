@@ -1,5 +1,12 @@
 import os
 import time
+import test
+from PIL import Image
+from termcolor import colored
+import numpy as np
+from colorama import Fore, Style
+import matplotlib.pyplot as plt
+
 import winsound
 import threading
 import ctypes
@@ -10,6 +17,9 @@ TERM_HEIGHT  = os.get_terminal_size().lines
 MENU_ART_LEN = int(68)
 MENU_WIDTH   = int(29)
 MENU_HEIGHT  = int(6)
+
+
+
 
 menu = R'''
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
@@ -135,8 +145,6 @@ def getMenuInput(x, y) -> int:
             print(GotoXY(x, y) + 40 * ' ', end='')
     return res
 
-
-
 def gameMenu():
     os.system("cls")
     changeTextColor(255, 209, 227)
@@ -160,6 +168,7 @@ def gameMenu():
         # Exit
         return
 
+#hello
 #----------------------------------------------------#
 FixConsole()
 # #winsound.PlaySound("music.wav", winsound.SND_FILENAME | winsound.SND_ASYNC)
