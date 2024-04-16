@@ -22,4 +22,4 @@ jobs:
       uses: ryan-rozario/pipreqs-action@master
       with:
         PROJECT_PATH: memory-game-python
-         REQUIREMENT_PATH: memory-game-python/requirements.txt
+        REQUIREMENT_PATH: memory-game-python/requirements.txt
