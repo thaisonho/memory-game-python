@@ -201,11 +201,6 @@ def gameMenu():
         # Exit
         return
 
-#hello
-#gameMenu()
-    
-
-game_match()
 #----------------------------------------------------#
 FixConsole()
 # #winsound.PlaySound("music.wav", winsound.SND_FILENAME | winsound.SND_ASYNC)
@@ -214,7 +209,9 @@ FixConsole()
 # timer_thread = threading.Thread(target=count_timer)
 # # Bắt đầu chạy luồng đồng hồ đếm thời gian
 # timer_thread.start()
-# gameMenu()
+#gameMenu()
 # # Đợi cho luồng đồng hồ đếm thời gian hoàn thành
 # timer_thread.join()
 gameMenu()
+#game_match()
+#os.system("pause")
