@@ -52,12 +52,10 @@ def show_image(img_path):
             print(get_color(pix[0], pix[1], pix[2]), end='')
         print()
 
-
 def game_match():
     assets_dir = Path(__file__).parent / "assets"
     show_image(str(assets_dir) + "/friend.jpg")
     print(GotoXY(50, 15) + 'NAME')
-
 
 menu = R'''
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
