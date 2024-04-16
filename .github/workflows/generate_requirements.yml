@@ -12,10 +12,12 @@ jobs:
     
     steps:
     - name: Checkout code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.TOKEN }}
       
     - name: Set up Python
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v5
       with:
         python-version: '3.12'  
     
@@ -36,3 +38,5 @@ jobs:
         git add requirements.txt
         git commit -m "Auto-generate requirements.txt" || echo "No changes to commit"
         git push
+    env:
+      GITHUB_TOKEN: ${{ secrets.TOKEN }}
