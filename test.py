@@ -128,8 +128,6 @@ def generate_username(image_path):
 
     return colored_ascii_art
 
-
-
 def generate_gamematch(image_path):
     img = Image.open(image_path)
 
@@ -167,9 +165,6 @@ def generate_gamematch(image_path):
         colored_ascii_art += "\n"
 
     return colored_ascii_art
-
-
-
 
 # Example usage:
 image_path = "assets/friend.jpg"

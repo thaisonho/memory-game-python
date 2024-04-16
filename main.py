@@ -8,6 +8,7 @@ from colorama import Fore, Style
 import matplotlib.pyplot as plt
 import numpy as np
 from PIL import Image
+from pathlib import Path
 
 
 TERM_WIDTH       = os.get_terminal_size().columns
@@ -49,7 +50,8 @@ def show_image(img_path):
 
 
 def game_match():
-    show_image("assets/friend.jpg")
+    assets_dir = Path(__file__).parent / "assets"
+    show_image(str(assets_dir) + "/friend.jpg")
     print(GotoXY(50, 15) + 'NAME')
 
 
@@ -214,8 +216,6 @@ def gameMenu():
     #     # Exit
     #     return
 
-#gameMenu()
-    
-
-game_match()
+#game_match()
+gameMenu()
 os.system("pause")
