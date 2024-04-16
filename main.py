@@ -1,12 +1,21 @@
 import os
 import time
 import test
+from PIL import Image
+from termcolor import colored
+import numpy as np
+from colorama import Fore, Style
+import matplotlib.pyplot as plt
+
 
 TERM_WIDTH   = os.get_terminal_size().columns
 TERM_HEIGHT  = os.get_terminal_size().lines
 MENU_ART_LEN = int(68)
 MENU_WIDTH   = int(29)
 MENU_HEIGHT  = int(6)
+
+
+
 
 menu = R'''
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
