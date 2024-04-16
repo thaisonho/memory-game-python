@@ -8,6 +8,8 @@ from colorama import Fore, Style
 import matplotlib.pyplot as plt
 import numpy as np
 from PIL import Image
+import ctypes
+from ctypes import wintypes
 
 
 TERM_WIDTH       = os.get_terminal_size().columns
@@ -19,6 +21,7 @@ NEW_GAME_WIDTH   = 40
 SCORE_WIDTH      = 30
 GUIDE_WIDTH      = 24
 QUIT_WIDTH       = 19
+
 
 
 def GotoXY(x, y) -> str:
@@ -214,8 +217,63 @@ def gameMenu():
     #     # Exit
     #     return
 
+def set_console_position(x, y):
+    # Get the handle of the console window
+    console_window = ctypes.windll.kernel32.GetConsoleWindow()
+    # Set the position of the console window
+    SWP_NOSIZE = 0x0001
+    SWP_NOZORDER = 0x0004
+    ctypes.windll.user32.SetWindowPos(console_window, 0, x, y, 0, 0, SWP_NOSIZE | SWP_NOZORDER)
+
+def lock_console_position():
+    # Get the handle of the console window
+    console_window = ctypes.windll.kernel32.GetConsoleWindow()
+
+    # Get the window style
+    GWL_STYLE = -16
+    window_style = ctypes.windll.user32.GetWindowLongPtrW(console_window, GWL_STYLE)
+
+    # Remove the WS_CAPTION flag from the window style
+    WS_CAPTION = 0x00C00000
+    window_style = ctypes.wintypes.LONG(window_style & ~WS_CAPTION)
+
+    # Set the modified window style
+    ctypes.windll.user32.SetWindowLongPtrW(console_window, GWL_STYLE, window_style)
+
+    # Update the window size and appearance
+    SWP_NOSIZE = 0x0001
+    SWP_NOMOVE = 0x0002
+    SWP_FRAMECHANGED = 0x0020
+    ctypes.windll.user32.SetWindowPos(console_window, None, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE | SWP_FRAMECHANGED)
+
+def disable_resize_window():
+    # Get the handle of the console window
+    console_window = ctypes.windll.kernel32.GetConsoleWindow()
+
+    # Disable the resizing of the console window
+    GWL_STYLE = -16
+    WS_SIZEBOX = 0x00040000
+    window_style = ctypes.windll.user32.GetWindowLongW(console_window, GWL_STYLE)
+    window_style = ctypes.wintypes.LONG(window_style & ~WS_SIZEBOX)
+    ctypes.windll.user32.SetWindowLongW(console_window, GWL_STYLE, window_style)
+
+def show_scrollbar():
+    # Get the handle of the console window
+    console_window = ctypes.windll.kernel32.GetConsoleWindow()
+
+    # Show or hide the scrollbars
+    SB_BOTH = 3
+    ShowScrollBar = ctypes.windll.user32.ShowScrollBar
+    ShowScrollBar(console_window, SB_BOTH, False)
+
+def FixConsole():
+    set_console_position(110,100)
+    lock_console_position()
+    disable_resize_window()
+    show_scrollbar()
+
 #----------------------------------------------------#
-#FixConsole()
+FixConsole()
 # #winsound.PlaySound("music.wav", winsound.SND_FILENAME | winsound.SND_ASYNC)
 # timing = True
 # # Tạo luồng cho đồng hồ đếm thời gian
