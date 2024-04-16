@@ -10,6 +10,7 @@ import numpy as np
 from PIL import Image
 import ctypes
 from ctypes import wintypes
+from pathlib import Path
 
 
 TERM_WIDTH       = os.get_terminal_size().columns
@@ -52,7 +53,8 @@ def show_image(img_path):
 
 
 def game_match():
-    show_image("assets/friend.jpg")
+    assets_dir = Path(__file__).parent / "assets"
+    show_image(str(assets_dir) + "/friend.jpg")
     print(GotoXY(50, 15) + 'NAME')
 
 
@@ -268,7 +270,7 @@ def show_scrollbar():
 
 def FixConsole():
     set_console_position(110,100)
-    lock_console_position()
+    #lock_console_position()
     disable_resize_window()
     show_scrollbar()
 
@@ -284,8 +286,6 @@ FixConsole()
 # # Đợi cho luồng đồng hồ đếm thời gian hoàn thành
 # timer_thread.join()
 #gameMenu()
-#game_match()
+game_match()
 #os.system("pause")
-
-
 os.system("pause")
