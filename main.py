@@ -176,9 +176,25 @@ def userChoice_v2():
     quit_gradient = gradientText(quit_banner, 255, 209, 227, 255, 250, 183)
     printListAtPos((TERM_WIDTH - NEW_GAME_WIDTH) // 2, 9, new_game_gradient)
     while True:
+        keyboard.on_press
         if check == True:
             if prev_choice == 1:
-                printSpace((TERM_WIDTH - NEW_GAME_WIDTH) // 2,)
+                printSpace((TERM_WIDTH - NEW_GAME_WIDTH) // 2, 9, 5, NEW_GAME_WIDTH)
+            elif prev_choice == 2:
+                printSpace((TERM_WIDTH - SCORE_WIDTH) // 2, 9, 5, SCORE_WIDTH)
+            elif prev_choice == 3:
+                printSpace((TERM_WIDTH - GUIDE_WIDTH) // 2, 9, 5, GUIDE_WIDTH)
+            elif prev_choice == 4:
+                printSpace((TERM_WIDTH - QUIT_WIDTH) // 2, 9, 5, QUIT_WIDTH)
+            time.sleep(0.5)
+            if choice == 1:
+                printListAtPos((TERM_WIDTH - NEW_GAME_WIDTH) // 2, 9, new_game_gradient)
+            elif choice == 2:
+                printListAtPos((TERM_WIDTH - SCORE_WIDTH) // 2, 9, score_gradient)
+            elif choice == 3:
+                printListAtPos((TERM_WIDTH - GUIDE_WIDTH) // 2, 9, guide_gradient)
+            elif choice == 4:
+                printListAtPos((TERM_WIDTH - QUIT_WIDTH) // 2, 9, quit_gradient)
             check = False
         if keyboard.is_pressed('w'):
             prev_choice = choice
@@ -284,7 +300,7 @@ FixConsole()
 #gameMenu()
 # # Đợi cho luồng đồng hồ đếm thời gian hoàn thành
 # timer_thread.join()
-#gameMenu()
-game_match()
+gameMenu()
+#game_match()
 #os.system("pause")
 os.system("pause")
