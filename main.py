@@ -21,6 +21,7 @@ NEW_GAME_WIDTH   = 40
 SCORE_WIDTH      = 30
 GUIDE_WIDTH      = 24
 QUIT_WIDTH       = 19
+SCORE_BOARD_ART_WIDTH = 86
 
 menu_banner = R'''
 • ▌ ▄ ·. ▄▄▄ .• ▌ ▄ ·.       ▄▄▄   ▄· ▄▌   ▄▄ •  ▄▄▄· • ▌ ▄ ·. ▄▄▄ .
@@ -128,7 +129,6 @@ def filled_rec(x_pos, y_pos, height, width, r, g, b):
             print(GotoXY(ix, iy) + u'\u2588')
     changeTextColor()
 
-
 def filled_rec_with_text(x_pos, y_pos, height, width, r, g, b, text, r_t, g_t, b_t):
     filled_rec(x_pos, y_pos, height, width, r, g, b)
     changeTextColor(r_t, g_t, b_t)
@@ -144,10 +144,9 @@ def delete_rec(x_pos, y_pos, height, width):
             print(GotoXY(ix, iy) + " ")
     changeTextColor()
 
-
 def score_board():
     os.system('cls')
-    x_menu = 10
+    x_menu = (TERM_WIDTH - 80) // 2
     y_menu = 10
     y_prev: int
     height = 0
@@ -156,7 +155,7 @@ def score_board():
     isESC = False
     check = False
 
-    printArtAtPos(10, 1, score_bo)
+    printArtAtPos((TERM_WIDTH - SCORE_BOARD_ART_WIDTH) // 2, 1, score_bo)
 
     filled_rec(x_menu, y_menu, height, width, 247, 183, 135)
     changeTextColor(245, 245, 245, 247, 183, 135)
@@ -280,7 +279,6 @@ def userChoice_v2():
 
 def gameMenu():
     x_banner = (TERM_WIDTH - MENU_ART_LEN) // 2
-    x_menu = (TERM_WIDTH - MENU_WIDTH) // 2
     while True:
         os.system("cls")
         changeTextColor(255, 209, 227)
