@@ -1,16 +1,47 @@
+import sys
 import os
+import msvcrt
+import random 
 import time
+import threading
 import keyboard
-from PIL import Image
 from termcolor import colored
 import numpy as np
-from colorama import Fore, Style
+from colorama import init, Fore, Back, Style
 import matplotlib.pyplot as plt
+import numpy as np
+from PIL import Image
 import ctypes
 from ctypes import wintypes
 from pathlib import Path
+from pathlib import Path
 import msvcrt
 
+# Global variables
+
+left = 35
+top = 4
+size = 6
+countPair = 0
+score = 0
+timer = 0
+check = False
+timing = True
+time_thread = threading.Thread()
+player = "Player 1"
+player_snake = {}
+id = 0
+name_player = ""
+
+current_pos = [0, 1]  # Initial position (0, 0)
+visited = [False] * (size + 1) * (size + 1) # explanation
+icon = np.zeros((7, 7))
+
+answer_list = []
+matches = []
+
+first_block = [0, 0]
+second_block = [0, 0]
 
 TERM_WIDTH       = os.get_terminal_size().columns
 TERM_HEIGHT      = os.get_terminal_size().lines
@@ -21,7 +52,6 @@ NEW_GAME_WIDTH   = 40
 SCORE_WIDTH      = 30
 GUIDE_WIDTH      = 24
 QUIT_WIDTH       = 19
-SCORE_BOARD_ART_WIDTH = 86
 
 menu_banner = R'''
 • ▌ ▄ ·. ▄▄▄ .• ▌ ▄ ·.       ▄▄▄   ▄· ▄▌   ▄▄ •  ▄▄▄· • ▌ ▄ ·. ▄▄▄ .
@@ -59,15 +89,6 @@ quit_banner = """▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
 ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
 """
 
-score_bo = R'''
-███████╗ ██████╗ ██████╗ ██████╗ ███████╗    ██████╗  ██████╗  █████╗ ██████╗ ██████╗ 
-██╔════╝██╔════╝██╔═══██╗██╔══██╗██╔════╝    ██╔══██╗██╔═══██╗██╔══██╗██╔══██╗██╔══██╗
-███████╗██║     ██║   ██║██████╔╝█████╗      ██████╔╝██║   ██║███████║██████╔╝██║  ██║
-╚════██║██║     ██║   ██║██╔══██╗██╔══╝      ██╔══██╗██║   ██║██╔══██║██╔══██╗██║  ██║
-███████║╚██████╗╚██████╔╝██║  ██║███████╗    ██████╔╝╚██████╔╝██║  ██║██║  ██║██████╔╝
-╚══════╝ ╚═════╝ ╚═════╝ ╚═╝  ╚═╝╚══════╝    ╚═════╝  ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚═════╝ 
-'''
-
 
 
 def GotoXY(x, y) -> str:
@@ -75,30 +96,38 @@ def GotoXY(x, y) -> str:
     return res
 
 def get_ansi_color_code(r, g, b):
-    return round((r / 255) * 5) * 36 + round((g / 255) * 5) * 6 + round((b / 255) * 5) + 16
+    if r == g == b:
+        if r < 8:
+            return 16
+        if r > 248:
+            return 231
+        return round(((r - 8) / 247) * 24) + 232
+    return 16 + (36 * round(r / 255 * 5)) + (6 * round(g / 255 * 5)) + round(b / 255 * 5)
 
 def get_color(r, g, b):
-    return "\x1b[48;5;{}m \x1b[0m".format(get_ansi_color_code(r, g, b))
+    return "\x1b[48;5;{}m \x1b[0m".format(int(get_ansi_color_code(r,g,b)))
 
 def show_image(img_path):
     try:
         img = Image.open(img_path)
     except FileNotFoundError:
         exit('Image not found.')
-    newHeight = 30
-    newWidth = 120
-    img = img.resize((newWidth, newHeight), Image.LANCZOS)
+    h = 30
+    w = 120
+    img = img.resize((w, h), Image.LANCZOS)
     img_arr = np.asarray(img)
 
-    for x in range(newHeight):
-        for y in range(newWidth):
+    for x in range(0, h):
+        for y in range(0, w):
             pix = img_arr[x][y]
-            print(get_color(pix[0], pix[1], pix[2]), end='')
+            print(get_color(pix[0], pix[1], pix[2]), sep='', end='')
         print()
 
+
 def game_match():
-    assets_dir = Path(__file__).parent / "assets"
-    show_image(str(assets_dir) + "/friend.jpg")
+    gotoXY(0, 0)
+    init(autoreset=True)
+    show_image("assets/friend.jpg")
     print(GotoXY(50, 15) + 'NAME')
 
 # without any args: reset color
@@ -110,7 +139,7 @@ def changeTextColor(*args):
     if len(args) == 3:
         print("\x1b[38;2;{};{};{}m".format(args[0], args[1], args[2]), end='')
     if len(args) == 6:
-        print("\x1b[38;2;{};{};{};48;2;{};{};{}m".format(args[0], args[1], args[2], args[3], args[4], args[5]), end='')
+        print("\x1b[38;2;{};{};{};48;2;{};{};{}m".format(args[0], args[1], args[2], args[3], args[4], args[5], args[6]), end='')
 
 def GotoXY(x, y) -> str:
     res = "\x1b[{};{}f".format(y, x)
@@ -121,80 +150,6 @@ def printArtAtPos(x, y, art):
     for lines in art_lines:
         print(GotoXY(x, y) + lines)
         y += 1
-
-def filled_rec(x_pos, y_pos, height, width, r, g, b):
-    changeTextColor(r, g, b)
-    for ix in range(x_pos, x_pos + width + 1):
-        for iy in range(y_pos, y_pos + height + 1):
-            print(GotoXY(ix, iy) + u'\u2588')
-    changeTextColor()
-
-def filled_rec_with_text(x_pos, y_pos, height, width, r, g, b, text, r_t, g_t, b_t):
-    filled_rec(x_pos, y_pos, height, width, r, g, b)
-    changeTextColor(r_t, g_t, b_t)
-    text_x = x_pos + (width - len(text)) // 2
-    text_y = y_pos + height // 2
-    print(GotoXY(text_x, text_y) + text)
-    changeTextColor()
-
-
-def delete_rec(x_pos, y_pos, height, width):
-    for ix in range(x_pos, x_pos + width + 1):
-        for iy in range(y_pos, y_pos + height + 1):
-            print(GotoXY(ix, iy) + " ")
-    changeTextColor()
-
-def score_board():
-    os.system('cls')
-    x_menu = (TERM_WIDTH - 80) // 2
-    y_menu = 10
-    y_prev: int
-    height = 0
-    distance = 2
-    width = 80
-    isESC = False
-    check = False
-
-    printArtAtPos((TERM_WIDTH - SCORE_BOARD_ART_WIDTH) // 2, 1, score_bo)
-
-    filled_rec(x_menu, y_menu, height, width, 247, 183, 135)
-    changeTextColor(245, 245, 245, 247, 183, 135)
-    print(GotoXY(x_menu + 8, y_menu) + "<EMPTY>")
-    changeTextColor()
-    for i in range(2, 8):
-        print(GotoXY(x_menu + 8, (y_menu + distance * (i - 1))) + "<EMPTY>")
-    changeTextColor()
-
-    while not isESC:
-        key = msvcrt.getch().decode('utf-8')
-        if key == 's':
-            check = True
-            y_prev = y_menu
-            y_menu += distance
-            if (y_menu > 10 + 6 * 2):
-                y_menu = 10
-
-        if key == 'w':
-            check = True
-            y_prev = y_menu
-            y_menu -= distance
-            if (y_menu < 10):
-                y_menu = 10 + 6 * 2
-
-        if keyboard.is_pressed('esc'):
-            isESC = True
-            # go to MENU
-        if check == True:
-            delete_rec(x_menu, y_prev, height, width)
-            print(GotoXY(x_menu + 8, y_prev) + "<EMPTY>")
-            y_prev = y_menu
-            filled_rec(x_menu, y_menu, height, width, 247, 183, 135)
-            changeTextColor(245, 245, 245, 247, 183, 135)
-            print(GotoXY(x_menu + 8, y_menu) + "<EMPTY>")
-            changeTextColor()
-            check = False
-
-        time.sleep(0.05)
 
 def gradientText(text, r_from, g_from, b_from, r_to, g_to, b_to):
     res = []
@@ -238,7 +193,7 @@ def userChoice_v2():
     printListAtPos((TERM_WIDTH - NEW_GAME_WIDTH) // 2, 9, new_game_gradient)
 
     while True:
-        key = msvcrt.getch().decode('utf-8')
+        key = get_input()
         if keyboard.is_pressed('w'):
             prev_choice = choice
             choice -= 1
@@ -278,24 +233,326 @@ def userChoice_v2():
     return choice
 
 def gameMenu():
+    os.system("cls")
+    changeTextColor(255, 209, 227)
     x_banner = (TERM_WIDTH - MENU_ART_LEN) // 2
-    while True:
+    x_menu = (TERM_WIDTH - MENU_WIDTH) // 2
+    printListAtPos(x_banner, 1, gradientText(menu_banner, 91, 188, 255, 255, 209, 227))
+    user_choice = userChoice_v2()
+    if user_choice == 1:
         os.system("cls")
-        changeTextColor(255, 209, 227)
-        printListAtPos(x_banner, 1, gradientText(menu_banner, 91, 188, 255, 255, 209, 227))
-        user_choice = userChoice_v2()
-        if user_choice == 1:
-            # startGame()
-            print("start game")
-        if user_choice == 2:
-            score_board()
-        if user_choice == 3:
-            # Guide()
-            print("guide")
-        if user_choice == 4:
-            # Exit
-            break;
+        startGame()
+    if user_choice == 2:
+        # Scores()
+        print("scores")
+    if user_choice == 3:
+        # Guide()
+        print("guide")
+    if user_choice == 4:
+        # Exit
+        return
 
+# {---------------LOGIC GAME-----------------}
+
+def Random():
+    global matches
+
+    for i in range(0, 12):
+        matches.append(1)
+
+    for i in range(12, 24):
+        matches.append(2)
+
+    for i in range(24, 36):
+        matches.append(3)
+
+    random.shuffle(matches)
+
+def gotoXY(x, y):
+    sys.stdout.write("\x1b[%d;%df" % (y, x))
+    sys.stdout.flush()
+
+def drawGameBoard():
+    global left, top, size
+    # Draw top line
+    gotoXY(left + 1, top)
+    sys.stdout.write("┌")
+    for i in range(1, size * 8):
+        if i % 8 == 0:
+            sys.stdout.write("┬")
+        else:
+            sys.stdout.write("─")
+    sys.stdout.write("┐\n")
+
+    # Draw right line
+    for i in range(1, size * 4):
+        gotoXY(size * 8 + left + 1, i + top)
+        if i % 4 != 0:
+            sys.stdout.write("│")
+        else:
+            sys.stdout.write("┤")
+    gotoXY(size * 8 + left + 1, size * 4 + top)
+    sys.stdout.write("┘\n")
+
+    # Draw bottom line
+    for i in range(1, size * 8):
+        gotoXY(size * 8 + left - i + 1, size * 4 + top)
+        if i % 8 == 0:
+            sys.stdout.write("┴")
+        else:
+            sys.stdout.write("─")
+
+    gotoXY(left + 1, size * 4 + top)
+    sys.stdout.write("└")
+
+    # Draw left line
+    for i in range(1, size * 4):
+        gotoXY(left + 1, size * 4 + top - i)
+        if i % 4 != 0:
+            sys.stdout.write("│")
+        else:
+            sys.stdout.write("├")
+
+    # Draw vertical lines
+    for i in range(1, size * 4):
+        for j in range(8, size * 8, 8):
+            if i % 4 != 0:
+                gotoXY(j + left + 1, i + top)
+                sys.stdout.write("│")
+
+    # Draw horizontal lines
+    for i in range(1, size * 8):
+        for j in range(4, size * 4, 4):
+            gotoXY(i + left + 1, j + top)
+            if i % 8 == 0:
+                sys.stdout.write("┼")
+            else:
+                sys.stdout.write("─")
+
+    sys.stdout.flush()
+
+def drawInforBoard():
+    global left, top, size, score, player, timer
+      
+    for i in range(4):
+        gotoXY(left + size * 8 + 9, top + i * 4 + 3)
+        if i == 1:
+            sys.stdout.write("Player: {}".format(player))
+        elif i == 2:
+            sys.stdout.write("Score: {}".format(score))
+        elif i == 3:
+            sys.stdout.write("Time: {}".format(timer))
+
+
+    sys.stdout.flush()
+
+def display_timer(seconds):
+    global timer, left, size, top
+    minutes, seconds = divmod(seconds, 60)
+    hours, minutes = divmod(minutes, 60)
+    timer = "{:02d}:{:02d}:{:02d}".format(int(hours), int(minutes), int(seconds))
+    # gotoXY(left + size * 8 + 9, top + 3 * 4 + 3)
+    # sys.stdout.write("Time: {}".format(timer))
+
+def count_timer():
+    global timing
+    start_time = time.time()
+    while timing:
+        current_time = time.time()
+        elapsed_time = current_time - start_time
+        display_timer(elapsed_time)
+        time.sleep(1)  # Delay 1 second
+        
+def draw_highlighted_block(x, y):
+    global left, top, check, visited
+
+    for i in range(3):  # Vẽ 3 dòng
+        gotoXY(left + x * 8 + 2, top + y * 4 + i + 1)
+        sys.stdout.write("\033[47m" + " " * 7 + "\033[m")  # Tô màu cho toàn bộ ô
+    
+    sys.stdout.flush()
+
+def draw_unhighlighted_block(x, y):
+    global left, top, visited, icon
+
+    if icon[x, y] == True:
+        return
+    
+    for i in range(3):  # Vẽ 3 dòng
+        gotoXY(left + x * 8 + 2, top + y * 4 + i + 1)
+        sys.stdout.write(" " * 7)  # Không tô màu
+
+    sys.stdout.flush()
+
+def draw_highlighted_icon(x, y):
+    global matches, answer_list, visited, icon
+    
+    index = x * y
+    icon[x, y] = True 
+
+    for i in range(3):
+        gotoXY(left + x * 8 + 2, top + y * 4 + i + 1)
+        if i == 1: 
+            sys.stdout.write("\033[47m" + f"\033[31m{matches[index]: ^7}" + "\033[m")
+        else:
+            sys.stdout.write("\033[47m" + " " * 7 + "\033[m")  # Tô màu cho toàn bộ ô
+
+    sys.stdout.flush()
+
+def move(direction):
+    global current_pos, size, check, visited, icon
+
+    # Calculate the new position based on the direction
+    new_pos = current_pos.copy()
+    if direction == "left":
+        if current_pos[0] > 0:
+            new_pos[0] -= 1
+
+        if current_pos[0] == 0:
+            new_pos[0] = size - 1    
+
+    elif direction == "right":
+        if current_pos[0] < size - 1:
+            new_pos[0] += 1
+        if current_pos[0] == size - 1:
+            new_pos[0] = 0
+
+    elif direction == "up":
+        if current_pos[1] > 0:
+            new_pos[1] -= 1
+        if current_pos[1] == 0:
+            new_pos[1] = size - 1
+
+    elif direction == "down":
+        if current_pos[1] < size - 1:
+            new_pos[1] += 1
+        if current_pos[1] == size - 1:
+            new_pos[1] = 0
+
+    if new_pos != current_pos:
+        if icon[new_pos[0], new_pos[1]] == True:
+            draw_highlighted_icon(new_pos[0], new_pos[1])
+            draw_unhighlighted_block(current_pos[0], current_pos[1])
+            current_pos = new_pos
+            return
+        if check == True: 
+            current_pos = new_pos
+            draw_highlighted_block(current_pos[0], current_pos[1])
+            check = False
+        else:
+            draw_unhighlighted_block(current_pos[0], current_pos[1])
+            current_pos = new_pos
+            draw_highlighted_block(current_pos[0], current_pos[1])
+
+def saveGame():
+    
+    global score, player
+
+    with open("Information.txt", "w") as F:
+        F.write(f"Score: {score}\n")
+        F.write(f"Player: {player}\n")
+    
+    gameMenu()
+
+def checkEnter():
+    global check
+    check = True
+
+    x = current_pos[0]
+    y = current_pos[1]
+
+    index = x * y
+
+    draw_unhighlighted_block(x, y)
+    draw_highlighted_icon(x, y)
+
+    answer_list.append(index) 
+
+    if len(answer_list) == 1:
+        first_block[0] = x
+        first_block[1] = y
+    
+    if len(answer_list) == 2:
+        second_block[0] = x
+        second_block[1] = y
+        checkCorrect()
+ 
+def checkCorrect():
+    global answer_list, first_block, second_block, left, top, countPair, visited, score
+
+    if len(answer_list) == 2:   
+        if matches[answer_list[0]] == matches[answer_list[1]]:
+            icon[first_block[0], first_block[1]] = True
+            icon[second_block[0], second_block[1]] = True
+            countPair += 1
+            score += 50
+        else: 
+            time.sleep(0.5)
+            icon[first_block[0], first_block[1]] = False
+            icon[second_block[0], second_block[1]] = False
+            draw_unhighlighted_block(first_block[0], first_block[1])
+            draw_unhighlighted_block(second_block[0], second_block[1])
+
+
+    answer_list = []
+
+def checkWin():
+    global countPair
+    if countPair * 2 == 36:
+        gotoXY(58, 32)
+        print("YOU WIN")
+        return
+
+def get_input():
+    try:
+        key = msvcrt.getch().decode('utf-8') # W, S, A, D, U, Enter
+        return key
+    except UnicodeDecodeError: # Avoid press another key 
+        return None
+    
+def moveLoop():
+    global timing, time_thread
+
+    while timing == True:
+        drawInforBoard()
+        checkWin()
+        key = get_input() # Don't print any key to console
+        if key == "w":
+            move("up")
+        elif key == "s":
+            move("down")
+        elif key == "a":
+            move("left")
+        elif key == "d":
+            move("right")
+        elif key == "u":
+            timing = False
+            saveGame() 
+            break 
+        elif key == "\r":
+            checkEnter()
+        else:
+            pass
+            
+def startGame():
+    global timing, time_thread
+    timing = True
+    # Tạo luồng cho đồng hồ đếm thời gian
+    timer_thread = threading.Thread(target=count_timer)
+    # Bắt đầu chạy luồng đồng hồ đếm thời gian
+    timer_thread.start()
+    # Đợi cho luồng đồng hồ đếm thời gian hoàn thành
+
+    # Test the drawGameBoard function
+    #new_game(player_snake, id, name_player)
+    #game_match()
+    drawGameBoard()
+    #drawInforBoard()
+    Random()
+
+    # Test the move function
+    moveLoop()
+    
 def set_console_position(x, y):
     # Get the handle of the console window
     console_window = ctypes.windll.kernel32.GetConsoleWindow()
@@ -345,13 +602,70 @@ def show_scrollbar():
     ShowScrollBar = ctypes.windll.user32.ShowScrollBar
     ShowScrollBar(console_window, SB_BOTH, False)
 
+def set_window_size(width, height):
+    kernel32 = ctypes.windll.kernel32
+    hStdout = kernel32.GetStdHandle(-11)  
+    rect = ctypes.wintypes.SMALL_RECT(0, 0, width - 1, height - 1)
+    kernel32.SetConsoleWindowInfo(hStdout, True, ctypes.byref(rect))
+    
+def set_screen_buffer_size(width, height):
+    kernel32 = ctypes.windll.kernel32
+    hStdout = kernel32.GetStdHandle(-11)  
+    coord = ctypes.wintypes._COORD(width, height)
+    kernel32.SetConsoleScreenBufferSize(hStdout, coord)
+
 def FixConsole():
+    set_window_size(120,30)
+    set_screen_buffer_size(120,30)
     set_console_position(110,100)
-    #lock_console_position()
+    lock_console_position()
     disable_resize_window()
     show_scrollbar()
 
+# {---------------------Name Player-----------------------}
+def is_valid_name(player_snake, id, st):
+    for i in range(1, id + 1):
+        if st == player_snake[i].name:
+            return False
+    return True
+
+def not_valid():
+    print("This name is not valid. Please enter the name again!!!")
+
+def refill():
+    os.system('cls' if os.name == 'nt' else 'clear')  # Clear the console
+
+    print(" " * 58)  # Clear the line at row 14
+    print(" " * 24, end="")  # Clear the line at row 12
+
+def user_name():
+    init(autoreset=True)
+    show_image("assets/user.jpg")
+
+def new_game(player_snake, id, name_player):
+    os.system('cls' if os.name == 'nt' else 'clear')
+
+    user_name()
+
+    gotoXY(58, 15)
+    print("NAME PLAYER: ", end="")
+    name_player = input()
+
+    while True:
+        if is_valid_name(player_snake, id, name_player) and len(name_player) <= 10 and name_player != "":
+            break
+
+        not_valid()
+        time.sleep(1.5)
+        refill()
+        
+        gotoXY(58, 15)
+        print("NAME PLAYER: ", end="")
+        name_player = input()
+
+    id += 1
 #----------------------------------------------------#
 FixConsole()
+#winsound.PlaySound("music.wav", winsound.SND_FILENAME | winsound.SND_ASYNC)
+
 gameMenu()
-# game_match()
