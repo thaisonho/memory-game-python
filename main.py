@@ -123,6 +123,15 @@ score_bo = R'''
 ╚══════╝ ╚═════╝ ╚═════╝ ╚═╝  ╚═╝╚══════╝    ╚═════╝  ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚═════╝ 
 '''
 
+guideline_art = """
+ ██████╗ ██╗   ██╗██╗██████╗ ███████╗██╗     ██╗███╗   ██╗███████╗
+██╔════╝ ██║   ██║██║██╔══██╗██╔════╝██║     ██║████╗  ██║██╔════╝
+██║  ███╗██║   ██║██║██║  ██║█████╗  ██║     ██║██╔██╗ ██║█████╗  
+██║   ██║██║   ██║██║██║  ██║██╔══╝  ██║     ██║██║╚██╗██║██╔══╝  
+╚██████╔╝╚██████╔╝██║██████╔╝███████╗███████╗██║██║ ╚████║███████╗
+ ╚═════╝  ╚═════╝ ╚═╝╚═════╝ ╚══════╝╚══════╝╚═╝╚═╝  ╚═══╝╚══════╝
+ """
+
 def GotoXY(x, y) -> str:
     res = "\x1b[{};{}f".format(y, x)
     return res
@@ -161,7 +170,7 @@ def game_match():
     init(autoreset=True)
     assets_dir = Path(__file__).parent / "assets"
     show_image(str(assets_dir) + "/friend.jpg")
-    filled_rec(left + 1, top, 24, 48, 0, 0, 0)
+    filled_rec(left + 1, top, 24, 48, 0, 0, 0, 0, 0, 0)
 
 # without any args: reset color
 # with 3 args: red, green, blue for foreground
@@ -184,11 +193,11 @@ def printArtAtPos(x, y, art):
         print(GotoXY(x, y) + lines)
         y += 1
 
-def filled_rec(x_pos, y_pos, height, width, r, g, b):
-    changeTextColor(r, g, b)
+def filled_rec(x_pos, y_pos, height, width, f_r, f_g, f_b, b_r, b_g, b_b):
+    changeTextColor(f_r, f_g, f_b, b_r, b_g, b_b)
     for ix in range(x_pos, x_pos + width + 1):
         for iy in range(y_pos, y_pos + height + 1):
-            print(GotoXY(ix, iy) + ' ')
+            print(GotoXY(ix, iy) + " ")
     changeTextColor()
 
 
@@ -221,7 +230,7 @@ def score_board():
 
     printArtAtPos((TERM_WIDTH - SCORE_BOARD_WIDTH) // 2, 1, score_bo)
 
-    filled_rec(x_menu, y_menu, height, width, 247, 183, 135)
+    filled_rec(x_menu, y_menu, height, width, 0, 0, 0, 247, 183, 135)
     changeTextColor(245, 245, 245, 247, 183, 135)
     print(GotoXY(x_menu + 8, y_menu) + "<EMPTY>")
     changeTextColor()
@@ -252,7 +261,7 @@ def score_board():
             delete_rec(x_menu, y_prev, height, width)
             print(GotoXY(x_menu + 8, y_prev) + "<EMPTY>")
             y_prev = y_menu
-            filled_rec(x_menu, y_menu, height, width, 247, 183, 135)
+            filled_rec(x_menu, y_menu, height, width, 0, 0, 0, 247, 183, 135)
             changeTextColor(245, 245, 245, 247, 183, 135)
             print(GotoXY(x_menu + 8, y_menu) + "<EMPTY>")
             changeTextColor()
@@ -341,26 +350,6 @@ def userChoice_v2():
             check = False
     return choice
 
-def gameMenu():
-    os.system("cls")
-    changeTextColor(255, 209, 227)
-    x_banner = (TERM_WIDTH - MENU_ART_LEN) // 2
-    while True:
-        os.system("cls")
-        changeTextColor(255, 209, 227)
-        printListAtPos(x_banner, 1, gradientText(menu_banner, 91, 188, 255, 255, 209, 227))
-        user_choice = userChoice_v2()
-        if user_choice == 1:
-            os.system("cls")
-            startGame()
-        if user_choice == 2:
-            score_board()
-        if user_choice == 3:
-            # Guide()
-            print("guide")
-        if user_choice == 4:
-            # Exit
-            break;
 
 # {---------------LOGIC GAME-----------------}
 
@@ -775,7 +764,79 @@ def new_game(player_snake, id, name_player):
         name_player = input()
 
     id += 1
+
+def guideline():
+    filled_rec(0, 0, 30, 120, 0, 0, 0, 126, 233, 208)
+
+    #printArtAtPos(40, 1, guideline_art)
+
+    # draw guideline
+    changeTextColor(0, 0, 0, 126, 233, 208)
+    print(GotoXY(28, 9) + "GUIDELINE")
+    print(GotoXY(10, 11) + "Trò chơi bao gồm 1 bàn chơi 6x6, đầu tiên các")
+    print(GotoXY(10, 13) + "lá bài sẽ được úp xuống, mỗi lá bài sẽ giữ cho")
+    print(GotoXY(10, 15) + "mình một con số riêng của mình. Ở mỗi lượt chơi,")
+    print(GotoXY(10, 17) + "người chơi sẽ chọn LẦN LƯỢT 2 lá bài khác nhau")
+    print(GotoXY(10, 19) + "trên bàn chơi, trò chơi sẽ kết thúc khi các lá ")
+    print(GotoXY(10, 21) + "bài đều được mở.")
+ 
+
+    # draw button
+    print(GotoXY(85, 9) + "BUTTON")
+    filled_rec(75, 11, 1, 4, 0, 0, 0, 245, 245, 245)
+    changeTextColor(0, 0, 0, 245, 245, 245)
+    print(GotoXY(76, 12) + "W")
+    changeTextColor(0, 0, 0, 126, 233, 208)
+    print(GotoXY(90, 12) + "Move Right")
+
+    filled_rec(75, 14, 1, 4, 0, 0, 0, 245, 245, 245)
+    changeTextColor(0, 0, 0, 245, 245, 245)
+    print(GotoXY(76, 15) + "A")
+    changeTextColor(0, 0, 0, 126, 233, 208)
+    print(GotoXY(90, 15) + "Move Left")
+
+    filled_rec(75, 17, 1, 4, 0, 0, 0, 245, 245, 245)
+    changeTextColor(0, 0, 0, 245, 245, 245)
+    print(GotoXY(76, 18) + "S")
+    changeTextColor(0, 0, 0, 126, 233, 208)
+    print(GotoXY(90, 18) + "Move Down")
+
+    filled_rec(75, 20, 1, 4, 0, 0, 0, 245, 245, 245)
+    changeTextColor(0, 0, 0, 245, 245, 245)
+    print(GotoXY(76, 21) + "D")
+    changeTextColor(0, 0, 0, 126, 233, 208)
+    print(GotoXY(90, 21) + "Move Left")
+
+    filled_rec(75, 23, 1, 4, 0, 0, 0, 245, 245, 245)
+    changeTextColor(0, 0, 0, 245, 245, 245)
+    print(GotoXY(76, 24) + "U")
+    changeTextColor(0, 0, 0, 126, 233, 208)
+    print(GotoXY(90, 24) + "Save Game")
+    changeTextColor()
+    os.system("pause")
+    for i in range(1, 31):
+        print(" " * 120)
 #----------------------------------------------------#
+def gameMenu():
+    os.system("cls")
+    changeTextColor(255, 209, 227)
+    x_banner = (TERM_WIDTH - MENU_ART_LEN) // 2
+    while True:
+        os.system("cls")
+        changeTextColor(255, 209, 227)
+        printListAtPos(x_banner, 1, gradientText(menu_banner, 91, 188, 255, 255, 209, 227))
+        user_choice = userChoice_v2()
+        if user_choice == 1:
+            os.system("cls")
+            startGame()
+        if user_choice == 2:
+            score_board()
+        if user_choice == 3:
+            guideline()
+        if user_choice == 4:
+            # Exit
+            break;
+
 def FixConsole():
     set_window_size(120,30)
     set_screen_buffer_size(120,30)
