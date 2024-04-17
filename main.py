@@ -6,11 +6,8 @@ from termcolor import colored
 import numpy as np
 from colorama import Fore, Style
 import matplotlib.pyplot as plt
-import numpy as np
-from PIL import Image
 import ctypes
 from ctypes import wintypes
-from pathlib import Path
 from pathlib import Path
 import msvcrt
 
@@ -61,6 +58,15 @@ quit_banner = """▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
 ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
 """
 
+score_bo = R'''
+███████╗ ██████╗ ██████╗ ██████╗ ███████╗    ██████╗  ██████╗  █████╗ ██████╗ ██████╗ 
+██╔════╝██╔════╝██╔═══██╗██╔══██╗██╔════╝    ██╔══██╗██╔═══██╗██╔══██╗██╔══██╗██╔══██╗
+███████╗██║     ██║   ██║██████╔╝█████╗      ██████╔╝██║   ██║███████║██████╔╝██║  ██║
+╚════██║██║     ██║   ██║██╔══██╗██╔══╝      ██╔══██╗██║   ██║██╔══██║██╔══██╗██║  ██║
+███████║╚██████╗╚██████╔╝██║  ██║███████╗    ██████╔╝╚██████╔╝██║  ██║██║  ██║██████╔╝
+╚══════╝ ╚═════╝ ╚═════╝ ╚═╝  ╚═╝╚══════╝    ╚═════╝  ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚═════╝ 
+'''
+
 
 
 def GotoXY(x, y) -> str:
@@ -94,7 +100,6 @@ def game_match():
     show_image(str(assets_dir) + "/friend.jpg")
     print(GotoXY(50, 15) + 'NAME')
 
-
 # without any args: reset color
 # with 3 args: red, green, blue for foreground
 # with 6 args: rgb for foreground & background
@@ -104,7 +109,7 @@ def changeTextColor(*args):
     if len(args) == 3:
         print("\x1b[38;2;{};{};{}m".format(args[0], args[1], args[2]), end='')
     if len(args) == 6:
-        print("\x1b[38;2;{};{};{};48;2;{};{};{}m".format(args[0], args[1], args[2], args[3], args[4], args[5], args[6]), end='')
+        print("\x1b[38;2;{};{};{};48;2;{};{};{}m".format(args[0], args[1], args[2], args[3], args[4], args[5]), end='')
 
 def GotoXY(x, y) -> str:
     res = "\x1b[{};{}f".format(y, x)
@@ -115,6 +120,82 @@ def printArtAtPos(x, y, art):
     for lines in art_lines:
         print(GotoXY(x, y) + lines)
         y += 1
+
+def filled_rec(x_pos, y_pos, height, width, r, g, b):
+    changeTextColor(r, g, b)
+    for ix in range(x_pos, x_pos + width + 1):
+        for iy in range(y_pos, y_pos + height + 1):
+            print(GotoXY(ix, iy) + u'\u2588')
+    changeTextColor()
+
+
+def filled_rec_with_text(x_pos, y_pos, height, width, r, g, b, text, r_t, g_t, b_t):
+    filled_rec(x_pos, y_pos, height, width, r, g, b)
+    changeTextColor(r_t, g_t, b_t)
+    text_x = x_pos + (width - len(text)) // 2
+    text_y = y_pos + height // 2
+    print(GotoXY(text_x, text_y) + text)
+    changeTextColor()
+
+
+def delete_rec(x_pos, y_pos, height, width):
+    for ix in range(x_pos, x_pos + width + 1):
+        for iy in range(y_pos, y_pos + height + 1):
+            print(GotoXY(ix, iy) + " ")
+    changeTextColor()
+
+
+def score_board():
+    os.system('cls')
+    x_menu = 10
+    y_menu = 10
+    y_prev: int
+    height = 0
+    distance = 2
+    width = 80
+    isESC = False
+    check = False
+
+    printArtAtPos(10, 1, score_bo)
+
+    filled_rec(x_menu, y_menu, height, width, 247, 183, 135)
+    changeTextColor(245, 245, 245, 247, 183, 135)
+    print(GotoXY(x_menu + 8, y_menu) + "<EMPTY>")
+    changeTextColor()
+    for i in range(2, 8):
+        print(GotoXY(x_menu + 8, (y_menu + distance * (i - 1))) + "<EMPTY>")
+    changeTextColor()
+
+    while not isESC:
+        key = msvcrt.getch().decode('utf-8')
+        if key == 's':
+            check = True
+            y_prev = y_menu
+            y_menu += distance
+            if (y_menu > 10 + 6 * 2):
+                y_menu = 10
+
+        if key == 'w':
+            check = True
+            y_prev = y_menu
+            y_menu -= distance
+            if (y_menu < 10):
+                y_menu = 10 + 6 * 2
+
+        if keyboard.is_pressed('esc'):
+            isESC = True
+            # go to MENU
+        if check == True:
+            delete_rec(x_menu, y_prev, height, width)
+            print(GotoXY(x_menu + 8, y_prev) + "<EMPTY>")
+            y_prev = y_menu
+            filled_rec(x_menu, y_menu, height, width, 247, 183, 135)
+            changeTextColor(245, 245, 245, 247, 183, 135)
+            print(GotoXY(x_menu + 8, y_menu) + "<EMPTY>")
+            changeTextColor()
+            check = False
+
+        time.sleep(0.05)
 
 def gradientText(text, r_from, g_from, b_from, r_to, g_to, b_to):
     res = []
@@ -198,24 +279,24 @@ def userChoice_v2():
     return choice
 
 def gameMenu():
-    os.system("cls")
-    changeTextColor(255, 209, 227)
     x_banner = (TERM_WIDTH - MENU_ART_LEN) // 2
     x_menu = (TERM_WIDTH - MENU_WIDTH) // 2
-    printListAtPos(x_banner, 1, gradientText(menu_banner, 91, 188, 255, 255, 209, 227))
-    user_choice = userChoice_v2()
-    if user_choice == 1:
-        # startGame()
-        print("start game")
-    if user_choice == 2:
-        # Scores()
-        print("scores")
-    if user_choice == 3:
-        # Guide()
-        print("guide")
-    if user_choice == 4:
-        # Exit
-        return
+    while True:
+        os.system("cls")
+        changeTextColor(255, 209, 227)
+        printListAtPos(x_banner, 1, gradientText(menu_banner, 91, 188, 255, 255, 209, 227))
+        user_choice = userChoice_v2()
+        if user_choice == 1:
+            # startGame()
+            print("start game")
+        if user_choice == 2:
+            score_board()
+        if user_choice == 3:
+            # Guide()
+            print("guide")
+        if user_choice == 4:
+            # Exit
+            break;
 
 def set_console_position(x, y):
     # Get the handle of the console window
@@ -274,15 +355,5 @@ def FixConsole():
 
 #----------------------------------------------------#
 FixConsole()
-# #winsound.PlaySound("music.wav", winsound.SND_FILENAME | winsound.SND_ASYNC)
-# timing = True
-# # Tạo luồng cho đồng hồ đếm thời gian
-# timer_thread = threading.Thread(target=count_timer)
-# # Bắt đầu chạy luồng đồng hồ đếm thời gian
-# timer_thread.start()
-#gameMenu()
-# # Đợi cho luồng đồng hồ đếm thời gian hoàn thành
-# timer_thread.join()
-#gameMenu()
-score_board()
-#game_match()
+gameMenu()
+# game_match()
