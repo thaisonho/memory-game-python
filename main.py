@@ -5,15 +5,13 @@ import random
 import time
 import threading
 import keyboard
+from PIL import Image 
 from termcolor import colored
 import numpy as np
 from colorama import init, Fore, Back, Style
 import matplotlib.pyplot as plt
-import numpy as np
-from PIL import Image
 import ctypes
 from ctypes import wintypes
-from pathlib import Path
 from pathlib import Path
 import msvcrt
 
@@ -90,6 +88,15 @@ quit_banner = """▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
 ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
 """
 
+score_bo = R'''
+███████╗ ██████╗ ██████╗ ██████╗ ███████╗    ██████╗  ██████╗  █████╗ ██████╗ ██████╗ 
+██╔════╝██╔════╝██╔═══██╗██╔══██╗██╔════╝    ██╔══██╗██╔═══██╗██╔══██╗██╔══██╗██╔══██╗
+███████╗██║     ██║   ██║██████╔╝█████╗      ██████╔╝██║   ██║███████║██████╔╝██║  ██║
+╚════██║██║     ██║   ██║██╔══██╗██╔══╝      ██╔══██╗██║   ██║██╔══██║██╔══██╗██║  ██║
+███████║╚██████╗╚██████╔╝██║  ██║███████╗    ██████╔╝╚██████╔╝██║  ██║██║  ██║██████╔╝
+╚══════╝ ╚═════╝ ╚═════╝ ╚═╝  ╚═╝╚══════╝    ╚═════╝  ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚═════╝ 
+'''
+
 
 
 def GotoXY(x, y) -> str:
@@ -129,7 +136,7 @@ def game_match():
     gotoXY(0, 0)
     init(autoreset=True)
     show_image("assets/friend.jpg")
-    print(GotoXY(50, 15) + 'NAME')
+    filled_rec(left + 1, top, 24, 48, 0, 0, 0)
 
 # without any args: reset color
 # with 3 args: red, green, blue for foreground
@@ -151,6 +158,82 @@ def printArtAtPos(x, y, art):
     for lines in art_lines:
         print(GotoXY(x, y) + lines)
         y += 1
+
+def filled_rec(x_pos, y_pos, height, width, r, g, b):
+    changeTextColor(r, g, b)
+    for ix in range(x_pos, x_pos + width + 1):
+        for iy in range(y_pos, y_pos + height + 1):
+            print(GotoXY(ix, iy) + ' ')
+    changeTextColor()
+
+
+def filled_rec_with_text(x_pos, y_pos, height, width, r, g, b, text, r_t, g_t, b_t):
+    filled_rec(x_pos, y_pos, height, width, r, g, b)
+    changeTextColor(r_t, g_t, b_t)
+    text_x = x_pos + (width - len(text)) // 2
+    text_y = y_pos + height // 2
+    print(GotoXY(text_x, text_y) + text)
+    changeTextColor()
+
+
+def delete_rec(x_pos, y_pos, height, width):
+    for ix in range(x_pos, x_pos + width + 1):
+        for iy in range(y_pos, y_pos + height + 1):
+            print(GotoXY(ix, iy) + " ")
+    changeTextColor()
+
+
+def score_board():
+    os.system('cls')
+    x_menu = 10
+    y_menu = 10
+    y_prev: int
+    height = 0
+    distance = 2
+    width = 80
+    isESC = False
+    check = False
+
+    printArtAtPos(10, 1, score_bo)
+
+    filled_rec(x_menu, y_menu, height, width, 247, 183, 135)
+    changeTextColor(245, 245, 245, 247, 183, 135)
+    print(GotoXY(x_menu + 8, y_menu) + "<EMPTY>")
+    changeTextColor()
+    for i in range(2, 8):
+        print(GotoXY(x_menu + 8, (y_menu + distance * (i - 1))) + "<EMPTY>")
+    changeTextColor()
+
+    while not isESC:
+        key = get_input()
+        if key == 's':
+            check = True
+            y_prev = y_menu
+            y_menu += distance
+            if (y_menu > 10 + 6 * 2):
+                y_menu = 10
+
+        if key == 'w':
+            check = True
+            y_prev = y_menu
+            y_menu -= distance
+            if (y_menu < 10):
+                y_menu = 10 + 6 * 2
+
+        if keyboard.is_pressed('esc'):
+            isESC = True
+            # go to MENU
+        if check == True:
+            delete_rec(x_menu, y_prev, height, width)
+            print(GotoXY(x_menu + 8, y_prev) + "<EMPTY>")
+            y_prev = y_menu
+            filled_rec(x_menu, y_menu, height, width, 247, 183, 135)
+            changeTextColor(245, 245, 245, 247, 183, 135)
+            print(GotoXY(x_menu + 8, y_menu) + "<EMPTY>")
+            changeTextColor()
+            check = False
+
+        time.sleep(0.05)
 
 def gradientText(text, r_from, g_from, b_from, r_to, g_to, b_to):
     res = []
@@ -234,30 +317,29 @@ def userChoice_v2():
     return choice
 
 def gameMenu():
-    os.system("cls")
-    changeTextColor(255, 209, 227)
     x_banner = (TERM_WIDTH - MENU_ART_LEN) // 2
     x_menu = (TERM_WIDTH - MENU_WIDTH) // 2
-    printListAtPos(x_banner, 1, gradientText(menu_banner, 91, 188, 255, 255, 209, 227))
-    user_choice = userChoice_v2()
-    if user_choice == 1:
+    while True:
         os.system("cls")
-        startGame()
-    if user_choice == 2:
-        # Scores()
-        print("scores")
-    if user_choice == 3:
-        # Guide()
-        print("guide")
-    if user_choice == 4:
-        # Exit
-        return
+        changeTextColor(255, 209, 227)
+        printListAtPos(x_banner, 1, gradientText(menu_banner, 91, 188, 255, 255, 209, 227))
+        user_choice = userChoice_v2()
+        if user_choice == 1:
+            os.system("cls")
+            startGame()
+        if user_choice == 2:
+            score_board()
+        if user_choice == 3:
+            # Guide()
+            print("guide")
+        if user_choice == 4:
+            # Exit
+            break;
 
 # {---------------LOGIC GAME-----------------}
 
 def Random():
     global matches
-
 
     for i in range(0, 18):
         matches.append(i + 1)
@@ -271,6 +353,7 @@ def gotoXY(x, y):
 
 def drawGameBoard():
     global left, top, size
+    
     # Draw top line
     gotoXY(left + 1, top)
     sys.stdout.write("┌")
@@ -334,14 +417,16 @@ def drawInforBoard():
     for i in range(4):
         gotoXY(left + size * 8 + 9, top + i * 4 + 3)
 
+        _changeTextColor(207, 235, 199)
         if i == 1:
-            sys.stdout.write("Player: {}".format(player))
+            print("Player: {}".format(player))
         elif i == 2:
-            sys.stdout.write("Score: {}".format(score))
+            print("Score: {}".format(score))
         elif i == 3:
-            sys.stdout.write("Time: {}".format(timer))
+            print("Time: {}".format(timer))
+        #changeTextColor()
 
-    sys.stdout.flush()
+    #sys.stdout.flush()
 
 def change_Terminal_background_color(r, g, b):
     color_code = get_ansi_color_code(r, g, b)
@@ -378,15 +463,11 @@ def draw_highlighted_block(x, y):
 
     for i in range(3):  # Vẽ 3 dòng
         gotoXY(left + x * 8 + 2, top + y * 4 + i + 1)
-        changeTextColor(245, 245, 245, 245, 245, 245)
-        #sys.stdout.write("\033[47m" + " " * 7 + "\033[m")  # Tô màu cho toàn bộ ô
-        print(" " * 7, end="") # Tô màu cho toàn bộ ô
-        changeTextColor()
+        sys.stdout.write("\033[47m" + " " * 7 + "\033[m")  # Tô màu cho toàn bộ ô
+    
+    sys.stdout.flush()
 
-    #sys.stdout.flush()  # Flush the output buffer
-    
 def draw_unhighlighted_block(x, y):
-    
     global left, top, visited, icon
 
     if icon[x, y] == True:
@@ -394,27 +475,24 @@ def draw_unhighlighted_block(x, y):
     
     for i in range(3):  # Vẽ 3 dòng
         gotoXY(left + x * 8 + 2, top + y * 4 + i + 1)
-        changeTextColor(207, 235, 199, 207, 235, 199)
-        print(" " * 7, end="")  # Không tô màu
-        changeTextColor()
-    
-    #sys.stdout.flush()  # Flush the output buffer
+        sys.stdout.write(" " * 7)  # Không tô màu
 
-def draw_highlighted_icon(x, y):
+    sys.stdout.flush()
+
+def draw_highlighted_number(x, y):
     global matches, answer_list, visited, icon
     
-    index = (6 * y) + x
-
+    index = 6 * x + y
     icon[x, y] = True 
 
     for i in range(3):
         gotoXY(left + x * 8 + 2, top + y * 4 + i + 1)
         if i == 1: 
-            print(f"\033[47m\033[31m{matches[index]: ^7}\033[m", end="")
+            sys.stdout.write("\033[47m" + f"\033[31m{matches[index]: ^7}" + "\033[m")
         else:
+            sys.stdout.write("\033[47m" + " " * 7 + "\033[m")  # Tô màu cho toàn bộ ô
 
-            print("\033[47m" + " " * 7 + "\033[m", end="")  # Tô màu cho toàn bộ ô
-   # sys.stdout.flush()  # Flush the output buffer
+    sys.stdout.flush()
 
 def move(direction):
     global current_pos, size, check, visited, icon
@@ -448,7 +526,7 @@ def move(direction):
 
     if new_pos != current_pos:
         if icon[new_pos[0], new_pos[1]] == True:
-            draw_highlighted_icon(new_pos[0], new_pos[1])
+            draw_highlighted_number(new_pos[0], new_pos[1])
             draw_unhighlighted_block(current_pos[0], current_pos[1])
             current_pos = new_pos
             return
@@ -481,7 +559,7 @@ def checkEnter():
     index = (6 * y) + x 
 
     draw_unhighlighted_block(x, y)
-    draw_highlighted_icon(x, y)
+    draw_highlighted_number(x, y)
 
     answer_list.append(index) 
 
@@ -672,5 +750,5 @@ def new_game(player_snake, id, name_player):
 FixConsole()
 #winsound.PlaySound("music.wav", winsound.SND_FILENAME | winsound.SND_ASYNC)
 
-change_Terminal_background_color(207, 235, 199)
+#change_Terminal_background_color(207, 235, 199)
 gameMenu()
